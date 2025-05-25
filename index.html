@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Карта репрессий православных христиан Тамбовской области</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>#map { height: 90vh; width: 100%; }</style>
+</head>
+<body>
+  <h2>Карта репрессий православных христиан Тамбовской области (1937–1938)</h2>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([52.7, 41.5], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    fetch('repressed_tambov.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          onEachFeature: function(feature, layer) {
+            let props = feature.properties;
+            let popupContent = `<b>Населённый пункт:</b> ${props['Населённый пункт']}<br>` +
+                               `<b>Число репрессированных:</b> ${props['ФИО'].length}<br>` +
+                               `<b>ФИО:</b> ${props['ФИО'].join(', ')}<br>` +
+                               `<b>Статус:</b> ${props['Статус'].join(', ')}<br>` +
+                               `<b>Статьи УК:</b> ${props['Статья'].join(', ')}<br>` +
+                               `<b>Приговоры:</b> ${props['Приговор'].join(', ')}<br>` +
+                               `<b>Дата арестов:</b> ${props['Дата ареста'].join(', ')}`;
+            layer.bindPopup(popupContent);
+          }
+        }).addTo(map);
+      });
+  </script>
+</body>
+</html>
